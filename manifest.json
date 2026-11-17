@@ -1,0 +1,10 @@
+
+{
+  "name": "Misprinter",
+  "version_number": "0.3.0",
+  "website_url": "https://github.com/Marrrrrrki/Misprinter",
+  "description": "A lightweight Balatro HUD mod that previews the next five cards in your draw pile.",
+  "dependencies": [
+    "Thunderstore-lovely-0.9.0"
+  ]
+}
