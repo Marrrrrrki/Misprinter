@@ -1,5 +1,5 @@
 
--- Misprinter v0.3.0
+-- Misprinter v0.4.0
 -- Displays the next 5 cards in the draw pile.
 
 print("[Misprinter] Loaded!")
@@ -27,6 +27,21 @@ local function draw_card(card, x, y, w, h)
 
     if not card then return end
 
+    lg.push("all")
+
+    -- Card shadow
+    lg.setColor(0, 0, 0, 0.55)
+    lg.rectangle("fill", x + 2, y + 3, w, h, 6, 6)
+
+    -- White Balatro-style card background
+    lg.setColor(1, 1, 1, 1)
+    lg.rectangle("fill", x, y, w, h, 6, 6)
+
+    -- Slightly darker edge
+    lg.setColor(0.72, 0.72, 0.72, 1)
+    lg.setLineWidth(1)
+    lg.rectangle("line", x, y, w, h, 6, 6)
+
     local front = card.children and card.children.front
 
     if front and front.atlas and front.atlas.image and front.sprite then
@@ -34,27 +49,30 @@ local function draw_card(card, x, y, w, h)
         local _, _, source_w, source_h = front.sprite:getViewport()
 
         if source_w and source_h and source_w > 0 and source_h > 0 then
+            -- Leave a small white border around the artwork.
+            local inset = 3
+            local draw_w = w - inset * 2
+            local draw_h = h - inset * 2
+
             lg.setColor(1, 1, 1, 1)
 
             lg.draw(
                 image,
                 front.sprite,
-                x,
-                y,
+                x + inset,
+                y + inset,
                 0,
-                w / source_w,
-                h / source_h
+                draw_w / source_w,
+                draw_h / source_h
             )
 
+            lg.pop()
             return
         end
     end
 
-    -- Fallback if the artwork isn't available.
-    lg.setColor(1, 1, 1, 1)
-    lg.rectangle("fill", x, y, w, h)
-
-    lg.setColor(0.1, 0.1, 0.1, 1)
+    -- Fallback if artwork isn't available.
+    lg.setColor(0.12, 0.12, 0.12, 1)
     lg.printf(
         tostring(card.base and card.base.value or "?"),
         x,
@@ -62,6 +80,8 @@ local function draw_card(card, x, y, w, h)
         w,
         "center"
     )
+
+    lg.pop()
 end
 
 local function draw_misprinter()
@@ -73,39 +93,52 @@ local function draw_misprinter()
     if #cards == 0 then return end
 
     local lg = love.graphics
-
     local screen_w = lg.getWidth()
 
-    local card_w = 48
-    local card_h = 66
-    local spacing = 6
+    -- Larger cards
+    local card_w = 60
+    local card_h = 84
+    local spacing = 8
 
-    local padding = 10
+    local padding = 12
+
     local panel_w = padding * 2
         + CARD_COUNT * card_w
         + (CARD_COUNT - 1) * spacing
 
-    local panel_h = card_h + 42
+    local panel_h = card_h + 48
 
     local x = screen_w - panel_w - 20
     local y = 25
 
     lg.push("all")
 
-    -- Background panel
-    lg.setColor(0.035, 0.04, 0.055, 0.94)
+    -- Panel shadow
+    lg.setColor(0, 0, 0, 0.45)
+    lg.rectangle(
+        "fill",
+        x + 3,
+        y + 4,
+        panel_w,
+        panel_h,
+        10,
+        10
+    )
+
+    -- Panel background
+    lg.setColor(0.035, 0.04, 0.055, 0.97)
     lg.rectangle(
         "fill",
         x,
         y,
         panel_w,
         panel_h,
-        8,
-        8
+        10,
+        10
     )
 
-    -- Border
-    lg.setColor(0.78, 0.72, 0.52, 1)
+    -- Gold border
+    lg.setColor(0.85, 0.76, 0.53, 1)
     lg.setLineWidth(2)
     lg.rectangle(
         "line",
@@ -113,16 +146,16 @@ local function draw_misprinter()
         y,
         panel_w,
         panel_h,
-        8,
-        8
+        10,
+        10
     )
 
     -- Heading
-    lg.setColor(0.95, 0.88, 0.68, 1)
+    lg.setColor(1, 0.92, 0.72, 1)
     lg.printf(
         "MISPRINTER - NEXT 5",
         x,
-        y + 7,
+        y + 8,
         panel_w,
         "center"
     )
@@ -133,7 +166,7 @@ local function draw_misprinter()
 
         if card then
             local card_x = x + padding + (i - 1) * (card_w + spacing)
-            local card_y = y + 29
+            local card_y = y + 34
 
             draw_card(
                 card,
